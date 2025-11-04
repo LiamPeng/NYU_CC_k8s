@@ -1,0 +1,31 @@
+alertmanager:
+  enabled: true
+  config:
+    route:
+      receiver: "slack"
+      group_by: ["alertname", "namespace"]
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 30m
+    receivers:
+      - name: "slack"
+        slack_configs:
+          - api_url: ${SLACK_WEBHOOK_URL}
+            channel: "#hw2-alerts"
+            send_resolved: true
+            title: "[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }} ({{ .CommonLabels.severity }})"
+            text: |
+              *Namespace:* {{ .CommonLabels.namespace }}
+              *Summary:* {{ .CommonAnnotations.summary }}
+              *Desc:* {{ .CommonAnnotations.description }}
+grafana:
+  service:
+    type: LoadBalancer
+  adminPassword: "mp7108"
+prometheus:
+  service:
+    type: LoadBalancer
+defaultRules:
+  create: true
+  rules:
+    kubeApiserverBurnrate: false
